@@ -1,0 +1,316 @@
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h2>Address Book</h2>
+      @if (!isLoading()) {
+        <span class="subtitle">{{ contacts().length }} contacts loaded</span>
+      }
+    </div>
+    @if (isLoading()) {
+      <div class="loading-overlay">
+        <mat-spinner diameter="50"></mat-spinner>
+        <span class="subtitle">{{ contacts().length }} contacts loaded</span>
+      </div>
+    }
+    <div class="header-actions">
+      <a class="requests-btn" *hasRole="'admin'" routerLink="/register-requests">
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <line x1="19" y1="8" x2="19" y2="14" />
+          <line x1="22" y1="11" x2="16" y2="11" />
+        </svg>
+        Registration Requests
+        @if (pendingRequestsCount() > 0) {
+          <span class="requests-badge">
+            {{ pendingRequestsCount() }}
+            <span class="sr-only">pending</span>
+          </span>
+        }
+      </a>
+      <button class="add-btn" *hasRole="'admin'" (click)="addNewContact()">+ Add Contact</button>
+    </div>
+  </div>
+
+  <div class="search-bar" role="search">
+    <label for="contact-search" class="sr-only">Search contacts</label>
+
+    <svg
+      class="search-bar__icon"
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="7" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+
+    <input
+      #searchInput
+      id="contact-search"
+      class="search-bar__input"
+      type="search"
+      placeholder="Search by name, job title, company or city..."
+      autocomplete="off"
+      spellcheck="false"
+      [formControl]="searchInputControl"
+    />
+
+    <button
+      type="button"
+      class="search-bar__clear"
+      (click)="searchInputControl.setValue('')"
+      aria-label="Clear search"
+      title="Clear"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="14"
+        height="14"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div>Loading data...</div>
+  }
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  <div class="list-layout" [class.has-peek]="selectedContact() !== null">
+    <div class="list-main">
+      @if (isSearching()) {
+        <div class="bottom-loading" role="status">
+          <mat-spinner diameter="24"></mat-spinner>
+          <span>Searching...</span>
+        </div>
+      }
+
+      @if (!isLoading() && !isSearching()) {
+        @if (contacts().length > 0) {
+          <div class="table-card">
+            <div class="table-head">
+              <table class="contacts-table">
+                <thead>
+                  <tr>
+                    <!-- NEW: row number column -->
+                    <th class="row-num-cell" scope="col">
+                      <span aria-hidden="true">#</span>
+                      <span class="sr-only">Row number</span>
+                    </th>
+                    <th
+                      [appSortable]="'first_name'"
+                      [sortState]="sortState()"
+                      (sort)="onSort($event)"
+                    >
+                      Name
+                    </th>
+                    <th
+                      [appSortable]="'job_title'"
+                      [sortState]="sortState()"
+                      (sort)="onSort($event)"
+                    >
+                      Job Title
+                    </th>
+                    <th [appSortable]="'company'" [sortState]="sortState()" (sort)="onSort($event)">
+                      Company
+                    </th>
+                    <th [appSortable]="'city'" [sortState]="sortState()" (sort)="onSort($event)">
+                      City
+                    </th>
+                    <th class="contact-info-cell">Contact Info</th>
+                    <th class="actions-cell">Actions</th>
+                  </tr>
+                </thead>
+              </table>
+            </div>
+
+            <!-- The scrollable box. itemSize must equal the row height in the CSS -->
+            <cdk-virtual-scroll-viewport
+              class="contacts-viewport"
+              [itemSize]="rowHeight"
+              [style.height.px]="viewportHeight()"
+              [minBufferPx]="rowHeight * 2"
+              [maxBufferPx]="rowHeight * 4"
+              (scrolledIndexChange)="onScrolledIndexChange()"
+              tabindex="0"
+              aria-label="Contacts. Use the arrow keys to preview a contact, Enter to open it."
+              (keydown)="onListKeydown($event)"
+            >
+              <table class="contacts-table">
+                <tbody>
+                  <tr
+                    *cdkVirtualFor="
+                      let contact of sortedContacts();
+                      let i = index;
+                      trackBy: trackById
+                    "
+                    [class.is-selected]="contact.id === selectedId()"
+                    [attr.aria-current]="contact.id === selectedId() ? 'true' : null"
+                    title="Click to preview, double-click to open"
+                    (click)="onRowClick(contact, $event)"
+                    (dblclick)="viewDetails(contact.id!)"
+                  >
+                    <td class="row-num-cell">
+                      <span class="row-num">{{ i + 1 }}</span>
+                    </td>
+                    <td>
+                      <div class="name-cell">
+                        <span class="avatar" aria-hidden="true">
+                          {{ (contact.first_name || '').charAt(0)
+                          }}{{ (contact.last_name || '').charAt(0) }}
+                        </span>
+                        <span class="name-text"
+                          >{{ contact.first_name }} {{ contact.last_name }}</span
+                        >
+                      </div>
+                    </td>
+                    <td>{{ contact.job_title || '---' }}</td>
+                    <td>{{ contact.company || '---' }}</td>
+                    <td>{{ contact.city || '---' }}</td>
+                    <td class="contact-info-cell">
+                      @if (contact.addresses?.length) {
+                        <div class="address-row">
+                          <span
+                            class="address-chip"
+                            [title]="
+                              contact.addresses![0].type + ': ' + contact.addresses![0].value
+                            "
+                          >
+                            <span class="address-chip__icon" aria-hidden="true">{{
+                              addressIcons[contact.addresses![0].type]
+                            }}</span>
+                            <span class="sr-only">{{ contact.addresses![0].type }}:</span>
+                            <span class="address-chip__value">{{
+                              contact.addresses![0].value
+                            }}</span>
+                          </span>
+                          @if (contact.addresses!.length > 1) {
+                            <span class="address-more-badge"
+                              >+{{ contact.addresses!.length - 1 }} more</span
+                            >
+                          }
+                        </div>
+                      } @else {
+                        <span class="address-empty">No contact info</span>
+                      }
+                    </td>
+                    <td class="actions-cell">
+                      <div class="actions">
+                        <button class="btn-view" (click)="viewDetails(contact.id!)">
+                          View Details
+                        </button>
+                        <button
+                          class="btn-icon"
+                          aria-label="Delete contact"
+                          title="Delete"
+                          *hasRole="['admin']; mode: 'hide'"
+                          (click)="deleteContact(contact)"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="3 6 5 6 21 6" />
+                            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </cdk-virtual-scroll-viewport>
+          </div>
+        }
+
+        @if (isLoadingMore()) {
+          <div class="loading-spinner">Loading more contacts...</div>
+        }
+
+        @if (!hasMoreData() && contacts().length > 0) {
+          <div class="end-of-list" role="status">
+            @if (searchInputControl.value) {
+              That's all {{ contacts().length }}
+              {{ contacts().length === 1 ? 'match' : 'matches' }} for "{{
+                searchInputControl.value
+              }}".
+            } @else {
+              You've seen all {{ contacts().length }}
+              {{ contacts().length === 1 ? 'contact' : 'contacts' }}.
+            }
+          </div>
+        }
+        @if (contacts().length === 0 && !errorMessage()) {
+          @if (searchInputControl.value) {
+            <p class="end-of-list">No results found for "{{ searchInputControl.value }}"</p>
+          } @else if (selectedLetter()) {
+            <p class="end-of-list">No contacts starting with "{{ selectedLetter() }}"</p>
+          } @else {
+            <p class="end-of-list">No contacts yet.</p>
+          }
+        }
+      }
+    </div>
+
+    @if (selectedContact(); as selected) {
+      <app-contact-peek
+        [contact]="selected"
+        [position]="selectedIndex() + 1"
+        [total]="sortedContacts().length"
+        [hasMore]="hasMoreData()"
+        (close)="clearSelection()"
+        (previous)="moveSelection(-1)"
+        (next)="moveSelection(1)"
+        (openDetails)="viewDetails(selected.id!)"
+      />
+    }
+
+    <span class="sr-only" aria-live="polite">
+      @if (selectedContact(); as selected) {
+        Selected {{ selected.first_name }} {{ selected.last_name }}, {{ selectedIndex() + 1 }} of
+        {{ sortedContacts().length }}
+      }
+    </span>
+
+    <app-alphabet-rail
+      [selected]="selectedLetter()"
+      [available]="availableLetters()"
+      (letterSelect)="onLetterClick($event)"
+    />
+  </div>
+</div>

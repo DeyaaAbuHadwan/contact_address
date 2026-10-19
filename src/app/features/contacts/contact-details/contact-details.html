@@ -1,0 +1,181 @@
+<div class="container">
+  <div class="page-header">
+    @if (contactID()) {
+      <h2>View Contact</h2>
+    } @else {
+      <h2>Add Contact</h2>
+    }
+    <button type="button" class="back-btn" (click)="cancelContactForm()">← Back to List</button>
+  </div>
+
+  <form class="contact-form" [formGroup]="contactForm" (ngSubmit)="onSave()">
+    <section class="form-section" formGroupName="contactDetailsForm">
+      <h3 class="section-title">Contact Details</h3>
+
+      <div class="form-grid">
+        <div
+          class="field"
+          [class.has-error]="showError(contactForm.get('contactDetailsForm.firstName')!)"
+        >
+          <label for="first_name">First Name <span class="required">*</span></label>
+          <input id="first_name" type="text" placeholder="e.g. John" formControlName="firstName" />
+          <p class="field-error">First name is required.</p>
+        </div>
+
+        <div
+          class="field"
+          [class.has-error]="showError(contactForm.get('contactDetailsForm.lastName')!)"
+        >
+          <label for="last_name">Last Name <span class="required">*</span></label>
+          <input id="last_name" type="text" placeholder="e.g. Smith" formControlName="lastName" />
+          <p class="field-error">Last name is required.</p>
+        </div>
+
+        <div
+          class="field"
+          [class.has-error]="showError(contactForm.get('contactDetailsForm.jobTitle')!)"
+        >
+          <label for="job_title">Job Title <span class="required">*</span></label>
+          <input
+            id="job_title"
+            type="text"
+            placeholder="e.g. Software Engineer"
+            formControlName="jobTitle"
+          />
+          <p class="field-error">Job title is required.</p>
+        </div>
+
+        <div
+          class="field"
+          [class.has-error]="showError(contactForm.get('contactDetailsForm.company')!)"
+        >
+          <label for="company">Company <span class="required">*</span></label>
+          <input id="company" type="text" placeholder="e.g. Acme Inc." formControlName="company" />
+          <p class="field-error">Company is required.</p>
+        </div>
+
+        <div
+          class="field"
+          [class.has-error]="showError(contactForm.get('contactDetailsForm.city')!)"
+        >
+          <label for="city">City <span class="required">*</span></label>
+          <input id="city" type="text" placeholder="e.g. New York" formControlName="city" />
+          <p class="field-error">City is required.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="form-section" formArrayName="addressContactForm">
+      <div class="section-header">
+        <h3 class="section-title">Addresses</h3>
+        <button
+          type="button"
+          class="add-address-btn"
+          title="Add address"
+          aria-label="Add address"
+          (click)="addAddress()"
+          *hasRole="['admin']; mode: 'hide'"
+        >
+          <span class="plus">+</span>
+          <span>Add Address</span>
+        </button>
+      </div>
+
+      <div class="address-list">
+        @for (addressContact of addressContactForm.controls; track addressContact; let i = $index) {
+          <div [formGroupName]="i" class="address-row">
+            <div class="field type-field">
+              <label for="address_type_{{ i }}">Type</label>
+              <ng-select
+                class="app-select"
+                labelForId="address_type_{{ i }}"
+                formControlName="addressType"
+                [items]="addressTypes"
+                bindLabel="label"
+                bindValue="value"
+                placeholder="Select type"
+                [searchable]="false"
+                [clearable]="false"
+              >
+                <ng-template ng-option-tmp let-item="item" let-selected="selected">
+                  <span class="app-select-option">
+                    <span>{{ item.label }}</span>
+                    @if (selected) {
+                      <svg class="app-select-check" viewBox="0 0 16 16" aria-hidden="true">
+                        <path d="M3.5 8.5l3 3 6-7" />
+                      </svg>
+                    }
+                  </span>
+                </ng-template>
+              </ng-select>
+            </div>
+
+            <div
+              class="field value-field"
+              [class.has-error]="showError(addressContact.get('addressValue')!)"
+            >
+              <label for="address_value_{{ i }}">Value</label>
+              <input
+                id="address_value_{{ i }}"
+                [type]="getAddressDetail(i)?.inputType ?? 'text'"
+                [placeholder]="getAddressDetail(i)?.placeholder ?? 'Select a type first'"
+                [digitsOnly]="getAddressDetail(i)?.digitsOnly ?? false"
+                [allowPlus]="getAddressDetail(i)?.allowCountryCode ?? false"
+                [attr.maxlength]="getAddressDetail(i)?.maxLength ?? null"
+                formControlName="addressValue"
+              />
+
+              @if (addressContact.get('addressValue')?.hasError('required')) {
+                <p class="field-error">Value is required.</p>
+              } @else if (addressContact.get('addressValue')?.hasError('email')) {
+                <p class="field-error">Enter a valid email.</p>
+              } @else if (addressContact.get('addressValue')?.hasError('pattern')) {
+                <p class="field-error">Enter a valid number.</p>
+              }
+            </div>
+
+            <button
+              type="button"
+              class="remove-btn"
+              title="Remove address"
+              aria-label="Remove address"
+              (click)="removeAddress(i, addressContact.get('addressValue')?.value)"
+              *hasRole="['admin']; mode: 'hide'"
+            >
+              ✕
+            </button>
+          </div>
+        }
+      </div>
+
+      @if (addressContactForm.length === 0) {
+        <div class="empty-addresses" *hasRole="['admin']; mode: 'hide'">
+          No addresses yet. Click (+) to add an address.
+        </div>
+      }
+    </section>
+
+    @if (saveError()) {
+      <p class="save-error" role="alert">{{ saveError() }}</p>
+    }
+
+    <div class="form-actions">
+      <button
+        type="button"
+        class="cancel-btn"
+        *hasRole="['admin']; mode: 'hide'"
+        (click)="cancelContactForm()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="save-btn"
+        [disabled]="saving()"
+        *hasRole="['admin']; mode: 'hide'"
+      >
+        {{ saving() ? 'Saving…' : 'Save Contact' }}
+      </button>
+    </div>
+  </form>
+</div>

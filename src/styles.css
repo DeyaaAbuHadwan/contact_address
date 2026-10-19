@@ -1,1 +1,401 @@
 /* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&family=Lato:wght@400;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Lato', serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(#d0d6d9, #b1b4ba);
+  color: #d9e2f1;
+  min-height: 100vh;
+}
+
+header {
+  margin: 2rem 0;
+  text-align: center;
+}
+
+header img {
+  width: 5rem;
+  height: 5rem;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 2px solid #758a8a;
+  filter: drop-shadow(0 0 4px rgba(31, 42, 42, 0.5));
+}
+
+header h1 {
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  font-size: 3rem;
+  margin: 1rem 0;
+  letter-spacing: 0.2rem;
+  color: #2f4444;
+}
+
+form {
+  width: 90%;
+  max-width: 40rem;
+  margin: 3rem auto;
+  padding: 2rem;
+  background: linear-gradient(180deg, #253c3c, #1d4949);
+  border-radius: 8px;
+  box-shadow: 0 0 16px 1px rgba(0, 0, 0, 0.5);
+}
+
+.control,
+fieldset {
+  margin: 0.5rem 0;
+}
+
+.control.no-margin {
+  margin-bottom: 0;
+}
+
+.control label {
+  display: block;
+  font-size: 0.8rem;
+  margin-bottom: 0.2rem;
+  color: #9bafaf;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.control input {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #758a8a;
+  background-color: #869999;
+  color: #142020;
+}
+
+.control select {
+  display: block;
+  width: 100%;
+  max-width: 15rem;
+  padding: 0.5rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: 1px solid #758a8a;
+  background-color: #869999;
+  color: #142020;
+}
+
+.control:has(input[type='checkbox']) {
+  display: flex;
+  align-items: center;
+}
+
+.control:has(input[type='checkbox']) label {
+  margin: 0;
+}
+
+.control input[type='checkbox'] {
+  display: inline-block;
+  width: auto;
+  max-width: none;
+  margin-right: 0.5rem;
+  border-radius: 0;
+  border: none;
+  background-color: transparent;
+  color: #d9e2f1;
+}
+
+.control-error {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: #ffca99;
+  height: 0.5rem;
+  padding: 0.25rem 0 0 0;
+  height: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.control-error p {
+  margin: 0;
+}
+
+.control-row {
+  margin: 0.5rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.control-row .control {
+  flex: 1;
+}
+
+hr {
+  margin: 1.5rem 0;
+  border: 1px solid #147b73;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 4px;
+  border: none;
+  background-color: #147b73;
+  color: #d9e2f1;
+  cursor: pointer;
+}
+
+.button:hover,
+.button:focus {
+  background-color: #319890;
+}
+
+.button-flat {
+  background-color: transparent;
+  color: #9cbaba;
+}
+
+.button-flat:hover,
+.button-flat:focus {
+  background-color: transparent;
+  color: #869999;
+}
+
+.control:has(.ng-invalid.ng-touched.ng-dirty) label {
+  color: #f98b75;
+}
+
+input.ng-invalid.ng-touched.ng-dirty {
+  background-color: #fbdcd6;
+  border-color: #f84e2c;
+}
+
+/* ---------------------------------------------------------------------------
+   ng-select (class="app-select")
+   Fully styled here so it doesn't depend on the ng-select theme being loaded.
+   --------------------------------------------------------------------------- */
+.app-select.ng-select {
+  position: relative;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+/* The closed control */
+.app-select.ng-select .ng-select-container {
+  display: flex;
+  align-items: center;
+  min-height: 40px;
+  height: 40px;
+  padding: 0 10px 0 12px;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.app-select.ng-select:not(.ng-select-readonly) .ng-select-container:hover {
+  border-color: #94a3b8;
+}
+
+.app-select.ng-select .ng-value-container {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+}
+
+.app-select.ng-select .ng-value-container .ng-placeholder {
+  color: #94a3b8;
+}
+
+/* ng-select always renders the placeholder (fixedPlaceholder), so hide it once a value is picked */
+.app-select.ng-select .ng-has-value .ng-placeholder {
+  display: none;
+}
+
+.app-select.ng-select .ng-value-container .ng-value {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 500;
+}
+
+/* Hidden input ng-select uses for keyboard focus */
+.app-select.ng-select .ng-value-container .ng-input {
+  position: absolute;
+  inset: 0;
+  padding: 0 40px 0 12px;
+}
+
+.app-select.ng-select .ng-value-container .ng-input > input {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+/* Chevron */
+.app-select.ng-select .ng-arrow-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+}
+
+.app-select.ng-select .ng-arrow-wrapper .ng-arrow {
+  width: 8px;
+  height: 8px;
+  border: solid #64748b;
+  border-width: 0 2px 2px 0;
+  margin-top: -4px;
+  transform: rotate(45deg);
+  transition:
+    transform 0.2s ease,
+    margin 0.2s ease;
+}
+
+.app-select.ng-select.ng-select-opened .ng-arrow-wrapper .ng-arrow {
+  margin-top: 4px;
+  transform: rotate(-135deg);
+  border-color: #3b82f6;
+}
+
+/* Focused / open */
+.app-select.ng-select.ng-select-focused > .ng-select-container,
+.app-select.ng-select.ng-select-opened > .ng-select-container {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+/* Read-only (non-admin users) */
+.app-select.ng-select.ng-select-readonly > .ng-select-container {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  box-shadow: none;
+  color: #64748b;
+  cursor: default;
+}
+
+.app-select.ng-select.ng-select-readonly .ng-arrow-wrapper {
+  display: none;
+}
+
+/* Error state, same as the other inputs */
+.field.has-error .app-select.ng-select > .ng-select-container {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+
+/* The menu
+   ng-select renders the panel in a CDK overlay attached to <body> (not inside the
+   select) and copies the host classes onto it, so target `.ng-dropdown-panel.app-select`.
+   Position and width are handled by the overlay. */
+.ng-dropdown-panel.app-select {
+  box-sizing: border-box;
+  padding: 6px;
+  font-size: 0.95rem;
+  color: #334155;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow:
+    0 12px 28px -6px rgba(15, 23, 42, 0.18),
+    0 4px 10px -4px rgba(15, 23, 42, 0.08);
+  animation: app-select-in 0.14s ease-out;
+}
+
+.ng-dropdown-panel.app-select.ng-select-bottom {
+  margin-top: 6px;
+}
+
+.ng-dropdown-panel.app-select.ng-select-top {
+  margin-bottom: 6px;
+}
+
+@keyframes app-select-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ng-dropdown-panel.app-select .ng-dropdown-panel-items {
+  max-height: 240px;
+}
+
+.ng-dropdown-panel.app-select .ng-dropdown-panel-items .ng-option {
+  display: block;
+  padding: 9px 10px;
+  border-radius: 6px;
+  color: #334155;
+  background-color: transparent;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.ng-dropdown-panel.app-select .ng-dropdown-panel-items .ng-option + .ng-option {
+  margin-top: 2px;
+}
+
+/* Hovered or highlighted with the keyboard */
+.ng-dropdown-panel.app-select .ng-dropdown-panel-items .ng-option.ng-option-marked {
+  background-color: #f1f5f9;
+  color: #0f172a;
+}
+
+.ng-dropdown-panel.app-select .ng-dropdown-panel-items .ng-option.ng-option-selected,
+.ng-dropdown-panel.app-select
+  .ng-dropdown-panel-items
+  .ng-option.ng-option-selected.ng-option-marked {
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 600;
+}
+
+.app-select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.app-select-check {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#map {
+  height: 180px;
+}

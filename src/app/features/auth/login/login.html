@@ -1,0 +1,62 @@
+<div class="login-page">
+  <form class="login-card" [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+    <div class="login-header">
+      <div class="login-icon" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="28"
+          height="28"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20" />
+          <circle cx="12" cy="9" r="2.5" />
+          <path d="M8.5 15a3.5 3.5 0 0 1 7 0" />
+        </svg>
+      </div>
+      <h2>Welcome back</h2>
+      <p class="subtitle">Sign in to your Address Book account</p>
+    </div>
+
+    <div class="field" [class.has-error]="emailIsInvalid">
+      <label for="email">Email</label>
+      <input
+        id="email"
+        type="email"
+        placeholder="name@example.com"
+        autocomplete="email"
+        [formControl]="form.controls.email"
+      />
+      @if (emailIsInvalid) {
+        <p class="field-error">Please enter a valid email address.</p>
+      }
+    </div>
+
+    <div class="field" [class.has-error]="passwordIsInvalid">
+      <label for="password">Password</label>
+      <input
+        id="password"
+        type="password"
+        placeholder="Enter your password"
+        autocomplete="current-password"
+        formControlName="password"
+      />
+      @if (passwordIsInvalid) {
+        <p class="field-error">Password must be at least 6 characters.</p>
+      }
+    </div>
+    @if (saveError()) {
+      <p class="field-error">{{ saveError() }}</p>
+    }
+
+    <button type="submit" class="login-btn">Login</button>
+
+    <p class="switch-auth">
+      Don't have an account?
+      <a routerLink="/register">Create an account</a>
+    </p>
+  </form>
+</div>

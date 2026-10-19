@@ -1,0 +1,726 @@
+/* ---------- Page container ---------- */
+/* OLD: max-width: 900px; — now takes (almost) the full width of the screen */
+.container {
+  width: calc(100% - 48px);
+  max-width: 1600px;
+  margin: 2rem auto;
+  padding: 28px 32px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.06),
+    0 10px 30px rgba(15, 23, 42, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  direction: ltr;
+  color: #0f172a;
+}
+
+/* ---------- Title bar: title on the left, Add button on the right ---------- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  color: #0f172a;
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.subtitle {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+/* Add button (Primary Button) */
+.add-btn {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.add-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+}
+
+/* Buttons on the right of the title bar */
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* "Registration Requests" (admin only): secondary, outlined */
+.requests-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.requests-btn:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.requests-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.requests-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background-color: #dc2626;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.requests-btn:hover .requests-badge {
+  background-color: #ffffff;
+  color: #dc2626;
+}
+
+/* ---------- Search bar ---------- */
+.search-bar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+  margin-bottom: 1.25rem;
+}
+
+.search-bar__icon {
+  position: absolute;
+  left: 14px;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: color 0.15s ease;
+}
+
+.search-bar__input {
+  width: 100%;
+  height: 44px;
+  padding: 0 44px 0 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background-color: #f8fafc;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.95rem;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.search-bar__input::placeholder {
+  color: #94a3b8;
+}
+
+.search-bar__input:hover {
+  border-color: #cbd5e1;
+}
+
+.search-bar__input:focus {
+  border-color: #10b981;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+}
+
+.search-bar:focus-within .search-bar__icon {
+  color: #10b981;
+}
+
+/* Hide the browser's native clear "x" — we render our own */
+.search-bar__input::-webkit-search-cancel-button,
+.search-bar__input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.search-bar__clear {
+  position: absolute;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background-color: #e2e8f0;
+  color: #475569;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    opacity 0.15s ease,
+    visibility 0.15s ease,
+    transform 0.15s ease;
+}
+
+.search-bar__clear:hover {
+  background-color: #cbd5e1;
+  color: #0f172a;
+}
+
+.search-bar__clear:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+/* Only show the clear button once the user has typed something */
+.search-bar__input:placeholder-shown + .search-bar__clear {
+  opacity: 0;
+  visibility: hidden; /* also removes it from the tab order */
+  transform: scale(0.8);
+}
+
+/* Error message */
+.error {
+  background-color: #fee2e2;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #ef4444;
+}
+
+/* ---------- Table (shared base) ---------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 14px 16px;
+  text-align: left;
+  vertical-align: middle;
+  color: #334155;
+  /* OLD: border-bottom: 1px solid #0957bd; — softer divider looks cleaner */
+  border-bottom: 1px solid #eef2f7;
+}
+
+th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+tbody tr:hover {
+  background-color: #f5f9ff;
+}
+
+/* ---------- Buttons inside the table ---------- */
+/* Base style (also used by the old commented-out table) */
+td button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: background-color 0.15s ease;
+}
+
+td button:hover {
+  background-color: #2563eb;
+}
+
+/* "View Details": soft outlined button */
+td button.btn-view {
+  background-color: #eff6ff;
+  color: #2563eb;
+  border: 1px solid #bfdbfe;
+  font-weight: 600;
+  padding: 7px 14px;
+}
+
+td button.btn-view:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Icon-only delete button */
+td button.btn-icon {
+  background-color: transparent;
+  color: #dc2626;
+  padding: 6px;
+  margin-left: 8px;
+  vertical-align: middle;
+  line-height: 0;
+  border-radius: 8px;
+}
+
+td button.btn-icon:hover {
+  background-color: #fee2e2;
+}
+
+/* Empty state */
+p {
+  text-align: center;
+  color: #94a3b8;
+  margin-top: 2rem;
+  padding: 3rem 2rem;
+  background-color: #f8fafc;
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+}
+
+/* ---------- Contact Info chips ---------- */
+.contact-info-cell {
+  min-width: 200px;
+  max-width: 260px;
+}
+
+/* Used by the old (commented-out) table: chips stacked vertically */
+.address-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.address-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 4px 10px 4px 7px;
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: #334155;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.address-chip:hover {
+  background-color: #e0ecff;
+  border-color: #bfd4fe;
+}
+
+.address-chip__icon {
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  line-height: 1;
+}
+
+.address-chip__value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.address-more-badge {
+  display: inline-block;
+  margin-top: 2px;
+  margin-left: 4px;
+  padding: 2px 8px;
+  background-color: #eff6ff;
+  color: #2563eb;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.address-empty {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+/* Keep action buttons on one line, aligned regardless of row height */
+.actions-cell {
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+td .actions button.btn-icon {
+  margin-left: 0;
+}
+
+/* ===== NEW (virtual scroll with Angular CDK) ===== */
+
+/* Card that holds the header table + the scrolling rows */
+.table-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* Header and viewport both reserve room for the scrollbar,
+   so the header columns stay aligned with the row columns. */
+.table-head {
+  overflow-y: hidden;
+  scrollbar-gutter: stable;
+}
+
+.contacts-viewport {
+  scrollbar-gutter: stable;
+}
+
+.table-head th {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+/* The scrollable box. Its height is set from the component (viewportHeight()),
+   because the CDK viewport collapses to 0 without an explicit height. */
+.contacts-viewport {
+  width: 100%;
+  overflow-y: auto;
+}
+
+/* Header table and body table are separate, so fixed layout + the same
+   column widths keep the columns lined up. */
+.contacts-table {
+  table-layout: fixed;
+  width: 100%;
+  margin-top: 0;
+}
+
+/* Column widths. Column 1 is the row number (fixed px); the rest share the remaining width.
+   OLD (before the row number column): 20% / 14% / 14% / 11% / 24% / 17% on columns 1-6 */
+.contacts-table th:nth-child(1),
+.contacts-table td:nth-child(1) {
+  width: 64px;
+}
+.contacts-table th:nth-child(2),
+.contacts-table td:nth-child(2) {
+  width: 19%;
+}
+.contacts-table th:nth-child(3),
+.contacts-table td:nth-child(3),
+.contacts-table th:nth-child(4),
+.contacts-table td:nth-child(4) {
+  width: 13%;
+}
+.contacts-table th:nth-child(5),
+.contacts-table td:nth-child(5) {
+  width: 10%;
+}
+.contacts-table th:nth-child(6),
+.contacts-table td:nth-child(6) {
+  width: 23%;
+}
+.contacts-table th:nth-child(7),
+.contacts-table td:nth-child(7) {
+  width: 17%;
+}
+
+/* ---------- Row number column ---------- */
+.contacts-table .row-num-cell {
+  padding-left: 12px;
+  padding-right: 4px;
+  text-align: center;
+}
+
+/* Quiet by default, so it helps scanning without competing with the name */
+.row-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  /* Every digit has the same width, so 9 / 10 / 100 line up neatly */
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+/* Hovering a row highlights its number: the user sees which row they are on */
+.contacts-viewport tbody tr:hover .row-num {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+/* Every row MUST be exactly rowHeight (64px) tall, matching [itemSize] */
+.contacts-viewport tr {
+  height: 64px;
+}
+
+.contacts-viewport td {
+  padding-top: 0;
+  padding-bottom: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.contacts-viewport tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Name column: initials avatar + full name */
+.name-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.avatar {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #dbeafe, #c7d2fe);
+  color: #3730a3;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.name-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Contact Info on a single line: first address + "+N more" */
+.contacts-table .contact-info-cell {
+  min-width: 0;
+  max-width: none;
+}
+
+.address-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.address-row .address-chip {
+  min-width: 0;
+}
+
+.address-row .address-more-badge {
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.loading-spinner,
+.end-of-list {
+  text-align: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  padding: 14px 0 0;
+}
+
+/* ===== END NEW ===== */
+
+/* ---------- A-Z side rail ---------- */
+.list-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+/* min-width: 0 lets the table shrink instead of pushing the rail off screen */
+.list-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Visually hidden, still read by screen readers */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Phones: tighter page padding, and let the table scroll sideways
+   instead of squeezing the columns */
+@media (max-width: 768px) {
+  .container {
+    width: calc(100% - 16px);
+    padding: 20px 16px;
+  }
+
+  .search-bar {
+    max-width: none;
+  }
+
+  .table-card {
+    overflow-x: auto;
+  }
+
+  .table-head,
+  .contacts-viewport {
+    min-width: 900px;
+  }
+}
+
+.table-container {
+  position: relative; /* Crucial for the overlay to stay inside the table */
+}
+
+/* Centers the main spinner and adds a semi-transparent background */
+.loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.7); /* White with 70% opacity */
+  z-index: 10; /* Keeps it above the table rows */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Styles the small spinner at the bottom of the virtual scroll */
+.bottom-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  padding: 15px;
+  color: #666;
+}
+
+/* ---------- Selected contact (preview panel) ---------- */
+/* The list itself takes keyboard focus for ↑ ↓ Home End Enter Esc */
+.contacts-viewport:focus {
+  outline: none;
+}
+
+.contacts-viewport:focus-visible {
+  box-shadow: inset 0 0 0 2px #10b981;
+}
+
+.contacts-viewport tbody tr {
+  cursor: pointer;
+}
+
+.contacts-viewport tbody tr.is-selected {
+  background-color: #ecfdf5;
+}
+
+.contacts-viewport tbody tr.is-selected:hover {
+  background-color: #d1fae5;
+}
+
+/* Accent bar on the left edge of the selected row */
+.contacts-viewport tbody tr.is-selected td:first-child {
+  box-shadow: inset 3px 0 0 #10b981;
+}
+
+/* Comes after the hover rule, so the selected row keeps its green number on hover */
+.contacts-viewport tbody tr.is-selected .row-num {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+/* Wide screens: the panel docks beside the table and already shows every address,
+   so the table drops its Contact Info column and gives the space to the others */
+@media (min-width: 1200px) {
+  .list-layout.has-peek .contacts-table th:nth-child(6),
+  .list-layout.has-peek .contacts-table td:nth-child(6) {
+    display: none;
+  }
+
+  .list-layout.has-peek .contacts-table th:nth-child(2),
+  .list-layout.has-peek .contacts-table td:nth-child(2) {
+    width: 27%;
+  }
+
+  .list-layout.has-peek .contacts-table th:nth-child(3),
+  .list-layout.has-peek .contacts-table td:nth-child(3),
+  .list-layout.has-peek .contacts-table th:nth-child(4),
+  .list-layout.has-peek .contacts-table td:nth-child(4) {
+    width: 18%;
+  }
+
+  .list-layout.has-peek .contacts-table th:nth-child(5),
+  .list-layout.has-peek .contacts-table td:nth-child(5) {
+    width: 12%;
+  }
+
+  .list-layout.has-peek .contacts-table th:nth-child(7),
+  .list-layout.has-peek .contacts-table td:nth-child(7) {
+    width: 20%;
+  }
+}

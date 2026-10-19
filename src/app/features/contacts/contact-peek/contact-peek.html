@@ -1,0 +1,209 @@
+<div class="peek" role="region" aria-labelledby="peek-name" [style.--hue]="hue()">
+  <div class="peek__bar">
+    <div class="peek__nav">
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="previous.emit()"
+        [disabled]="position() <= 1"
+        aria-label="Previous contact"
+        title="Previous (↑)"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="18 15 12 9 6 15" />
+        </svg>
+      </button>
+      <span class="peek__pos">{{ position() }} of {{ total() }}{{ hasMore() ? '+' : '' }}</span>
+      <button
+        type="button"
+        class="icon-btn"
+        (click)="next.emit()"
+        [disabled]="position() >= total()"
+        aria-label="Next contact"
+        title="Next (↓)"
+      >
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+    </div>
+
+    <button
+      type="button"
+      class="icon-btn"
+      (click)="close.emit()"
+      aria-label="Close preview"
+      title="Close (Esc)"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="16"
+        height="16"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.5"
+        stroke-linecap="round"
+        aria-hidden="true"
+      >
+        <line x1="18" y1="6" x2="6" y2="18" />
+        <line x1="6" y1="6" x2="18" y2="18" />
+      </svg>
+    </button>
+  </div>
+
+  <div class="peek__identity">
+    <span class="peek__avatar" aria-hidden="true">{{ initials() }}</span>
+    <h3 id="peek-name" class="peek__name">{{ fullName() }}</h3>
+    @if (roleLine()) {
+      <div class="peek__role">{{ roleLine() }}</div>
+    }
+    @if (contact().city) {
+      <div class="peek__city">
+        <svg
+          viewBox="0 0 24 24"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
+        {{ contact().city }}
+      </div>
+    }
+
+    @if (phone() || email()) {
+      <div class="peek__quick">
+        @if (phone(); as tel) {
+          <a class="quick" [href]="'tel:' + tel.value">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path
+                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+              />
+            </svg>
+            Call
+          </a>
+        }
+        @if (email(); as mail) {
+          <a class="quick" [href]="'mailto:' + mail.value">
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <polyline points="22 6 12 13 2 6" />
+            </svg>
+            Email
+          </a>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="peek__section">
+    <div class="peek__label">Contact info</div>
+    @for (address of addresses(); track $index) {
+      <div class="method">
+        <span class="method__icon" aria-hidden="true">{{ icons[address.type] }}</span>
+        <div class="method__text">
+          <span class="method__type">{{ labels[address.type] }}</span>
+          <span class="method__value" dir="ltr">{{ address.value }}</span>
+        </div>
+        <button
+          type="button"
+          class="icon-btn method__copy"
+          [class.is-done]="copiedValue() === address.value"
+          (click)="copy(address.value)"
+          [attr.aria-label]="'Copy ' + labels[address.type]"
+          [title]="copiedValue() === address.value ? 'Copied' : 'Copy'"
+        >
+          @if (copiedValue() === address.value) {
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          } @else {
+            <svg
+              viewBox="0 0 24 24"
+              width="16"
+              height="16"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" />
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            </svg>
+          }
+        </button>
+      </div>
+    } @empty {
+      <div class="peek__empty">No contact info yet.</div>
+    }
+  </div>
+
+  <div class="peek__footer">
+    <button type="button" class="peek__open" (click)="openDetails.emit()">
+      Open full details <span aria-hidden="true">→</span>
+    </button>
+    <div class="peek__hint" aria-hidden="true">
+      <kbd>↑</kbd><kbd>↓</kbd> browse · <kbd>Enter</kbd> open · <kbd>Esc</kbd> close
+    </div>
+  </div>
+
+  <span class="sr-only" aria-live="polite">{{ copiedValue() ? 'Copied to clipboard' : '' }}</span>
+</div>

@@ -1,0 +1,113 @@
+<div class="container">
+  <div class="page-header">
+    <div>
+      <h2>Registration Requests</h2>
+      @if (!isLoading()) {
+        <span class="subtitle">{{ requests().length }} pending requests</span>
+      }
+    </div>
+    <a class="back-btn" routerLink="/contacts">← Back to Main Menu</a>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="error">{{ errorMessage() }}</div>
+  }
+
+  @if (isLoading()) {
+    <div class="state-box">Loading requests...</div>
+  } @else if (requests().length === 0) {
+    <!-- Empty state -->
+    <div class="state-box">
+      <svg
+        viewBox="0 0 24 24"
+        width="36"
+        height="36"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <polyline points="22 4 12 14.01 9 11.01" />
+      </svg>
+      <span>No pending requests. You're all caught up.</span>
+    </div>
+  } @else {
+    <div class="table-card">
+      <table class="requests-table">
+        <thead>
+          <tr>
+            <th class="row-num-cell" scope="col">
+              <span aria-hidden="true">#</span>
+              <span class="sr-only">Row number</span>
+            </th>
+            <th scope="col">Name</th>
+            <th scope="col">Email</th>
+            <th scope="col">Requested</th>
+            <th scope="col">Role</th>
+            <th scope="col" class="actions-cell">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (request of requests(); track request.id; let i = $index) {
+            <tr>
+              <td class="row-num-cell">
+                <span class="row-num">{{ i + 1 }}</span>
+              </td>
+              <td>
+                <div class="name-cell">
+                  <span class="avatar" aria-hidden="true">
+                    {{ (request.first_name || '').charAt(0) }}{{ (request.last_name || '').charAt(0) }}
+                  </span>
+                  <span class="name-text">{{ request.first_name }} {{ request.last_name }}</span>
+                </div>
+              </td>
+              <td class="email-cell" [title]="request.email">{{ request.email }}</td>
+              <td class="date-cell">{{ request.created_at | date: 'mediumDate' }}</td>
+              <td>
+                <label class="sr-only" [for]="'role-' + request.id">
+                  Role for {{ request.first_name }} {{ request.last_name }}
+                </label>
+                <select
+                  class="role-select"
+                  [id]="'role-' + request.id"
+                  #roleSelect
+                >
+                  <option value="" disabled selected>Select role</option>
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </td>
+              <td class="actions-cell">
+                <div class="actions">
+                  <button
+                    type="button"
+                    class="btn-approve"
+                    (click)="approveRequest(request, roleSelect.value)"
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      width="16"
+                      height="16"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Approve
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

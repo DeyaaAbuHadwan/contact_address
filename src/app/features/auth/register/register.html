@@ -1,0 +1,161 @@
+<div class="register-page">
+  @if (requestSent()) {
+    <!-- Success state: the request is waiting for an admin -->
+    <div class="register-card register-success">
+      <div class="register-icon register-icon--success" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          width="28"
+          height="28"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="12" cy="12" r="9" />
+          <polyline points="12 7 12 12 15 14" />
+        </svg>
+      </div>
+      <h2>Request sent</h2>
+      <p class="subtitle">
+        Your registration request is waiting for an admin to approve it. You can sign in once it's
+        approved.
+      </p>
+      <a routerLink="/login" class="register-btn register-btn--link">Back to login</a>
+    </div>
+  } @else {
+    <form class="register-card" [formGroup]="regesterForm" (ngSubmit)="onSubmit()" novalidate>
+      <div class="register-header">
+        <div class="register-icon" aria-hidden="true">
+          <svg
+            viewBox="0 0 24 24"
+            width="28"
+            height="28"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <line x1="19" y1="8" x2="19" y2="14" />
+            <line x1="22" y1="11" x2="16" y2="11" />
+          </svg>
+        </div>
+        <h2>Create an account</h2>
+        <p class="subtitle">Send a request to join the Address Book</p>
+      </div>
+
+      <div class="field-row">
+        <div class="field" [class.has-error]="showError(regesterForm.get('first_name')!)">
+          <label for="first_name">First name</label>
+          <input
+            id="first_name"
+            type="text"
+            placeholder="John"
+            autocomplete="given-name"
+            formControlName="first_name"
+          />
+          <p class="field-error">First name is required.</p>
+        </div>
+
+        <div class="field" [class.has-error]="showError(regesterForm.get('last_name')!)">
+          <label for="last_name">Last name</label>
+          <input
+            id="last_name"
+            type="text"
+            placeholder="Doe"
+            autocomplete="family-name"
+            formControlName="last_name"
+          />
+          <p class="field-error">Last name is required.</p>
+        </div>
+      </div>
+
+      <div class="field" [class.has-error]="showError(regesterForm.get('email')!)">
+        <label for="email">Email</label>
+        <input
+          id="email"
+          type="email"
+          placeholder="name@example.com"
+          autocomplete="email"
+          formControlName="email"
+        />
+        @if (regesterForm.controls.email.hasError('required')) {
+          <p class="field-error">Email is required.</p>
+        } @else if (regesterForm.controls.email.hasError('email')) {
+          <p class="field-error">Please enter a valid email address.</p>
+        } @else if (regesterForm.controls.email.hasError('emailAlreadyExists')) {
+          <p class="field-error">This email is already used.</p>
+        }
+      </div>
+
+      <div class="field" [class.has-error]="showError(regesterForm.get('password')!)">
+        <label for="password">Password</label>
+        <input
+          id="password"
+          type="password"
+          placeholder="At least 6 characters"
+          autocomplete="new-password"
+          formControlName="password"
+        />
+        @if (regesterForm.controls.password.hasError('required')) {
+          <p class="field-error">Password is required.</p>
+        } @else if (regesterForm.controls.password.hasError('minlength')) {
+          <p class="field-error">Password must be at least 6 characters.</p>
+        }
+      </div>
+
+      <div class="field" [class.has-error]="confirmPasswordIsInvalid">
+        <label for="confirm_password">Confirm password</label>
+        <input
+          id="confirm_password"
+          type="password"
+          placeholder="Repeat your password"
+          autocomplete="new-password"
+          formControlName="confirm_password"
+        />
+        @if (regesterForm.controls.confirm_password.hasError('required')) {
+          <p class="field-error">Please confirm your password.</p>
+        } @else if (regesterForm.hasError('passwordsMismatch')) {
+          <p class="field-error">Passwords do not match.</p>
+        }
+      </div>
+
+      <!-- Tells the user why there's no role field -->
+      <div class="info-note">
+        <svg
+          viewBox="0 0 24 24"
+          width="18"
+          height="18"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="10" />
+          <line x1="12" y1="16" x2="12" y2="12" />
+          <line x1="12" y1="8" x2="12.01" y2="8" />
+        </svg>
+        <span>An admin will review your request and assign your role.</span>
+      </div>
+
+      @if (saveError()) {
+        <p class="field-error form-error">{{ saveError() }}</p>
+      }
+
+      <button type="submit" class="register-btn" [disabled]="isSubmitting()">
+        {{ isSubmitting() ? 'Sending request...' : 'Send request' }}
+      </button>
+
+      <p class="switch-auth">
+        Already have an account?
+        <a routerLink="/login">Sign in</a>
+      </p>
+    </form>
+  }
+</div>
