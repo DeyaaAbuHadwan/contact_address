@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الترتيب: signal أم متغير عادي</title>
+<meta name="description" content="مقارنة موثّقة بالاختبارات بين ترتيب قائمة الـ Contacts بـ signal (التصميم الحالي) وبمتغير عادي: السلوك اليوم، الأداء، خمس ميزات قادمة، والقرار.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;600;700&display=swap">
+<style>
+/* Same design system as the Signals and Routing courses in this folder.
+   teal = signal design, slate = plain-variable design, red = what breaks. */
+:root{
+  --bg:#F2F4F6; --surface:#FFFFFF; --sunk:#E9EDF1; --ink:#14212F; --muted:#56657A; --line:#D6DDE5;
+  --accent:#0A6A94; --accent-bg:#E1EFF6;
+  --sig:#0C7A6E; --sig-bg:#DDF1EC; --plain:#5F6F84; --plain-bg:#E5E9EF;
+  --good:#16774B; --good-bg:#E2F3EA; --bad:#BF3F0B; --bad-bg:#FBEAE2; --warn:#8F5605; --warn-bg:#FAF0D7;
+  --code-bg:#0F1A27; --code-head:#16243A; --code-ink:#DCE6F0; --code-muted:#8FA1B6; --code-line:#2A3B52;
+  --code-good:#6BDDA2; --code-bad:#FF9E70;
+  --c-kw:#7CC6EE; --c-str:#B7DC8A; --c-fn:#FFD37C; --c-com:#8396AB; --c-num:#F4A97E; --c-type:#83DEC6; --c-attr:#E8A5D9;
+  --shadow:0 1px 2px rgba(20,33,47,.06), 0 8px 28px rgba(20,33,47,.07);
+  --f-display:"Reem Kufi","IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
+  --f-body:"IBM Plex Sans Arabic","Segoe UI",Tahoma,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"Cascadia Code",Consolas,monospace;
+  --r:10px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0C1218; --surface:#131B24; --sunk:#0F161E; --ink:#E3E9EF; --muted:#9BA9B8; --line:#243140;
+    --accent:#5DB6E2; --accent-bg:#0E2533;
+    --sig:#3BD0BC; --sig-bg:#0E2926; --plain:#A0AEBF; --plain-bg:#1B2430;
+    --good:#4CD893; --good-bg:#0E2A1E; --bad:#FA9A5E; --bad-bg:#33190C; --warn:#F0C150; --warn-bg:#2D240B;
+    --code-bg:#09111A; --code-head:#101B2A; --code-line:#22324A;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 28px rgba(0,0,0,.35);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0C1218; --surface:#131B24; --sunk:#0F161E; --ink:#E3E9EF; --muted:#9BA9B8; --line:#243140;
+  --accent:#5DB6E2; --accent-bg:#0E2533;
+  --sig:#3BD0BC; --sig-bg:#0E2926; --plain:#A0AEBF; --plain-bg:#1B2430;
+  --good:#4CD893; --good-bg:#0E2A1E; --bad:#FA9A5E; --bad-bg:#33190C; --warn:#F0C150; --warn-bg:#2D240B;
+  --code-bg:#09111A; --code-head:#101B2A; --code-line:#22324A;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 28px rgba(0,0,0,.35);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:80px; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--f-body); font-size:17px; line-height:1.9; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility}
+img,svg{max-width:100%}
+a{color:var(--accent); text-underline-offset:3px}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:6px}
+::selection{background:var(--sig-bg)}
+
+/* ---------- top bar ---------- */
+.topbar{position:sticky; top:env(safe-area-inset-top,0px); z-index:30; background:var(--surface); border-bottom:1px solid var(--line)}
+.topbar-in{max-width:880px; margin:0 auto; display:flex; align-items:center; gap:14px; min-height:58px;
+  padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+.brand{font-family:var(--f-display); font-weight:700; font-size:1.02rem; color:var(--ink); text-decoration:none; display:flex; align-items:center; gap:10px; min-width:0}
+.brand-txt{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.brand-mark{flex:none; display:inline-grid; place-items:center; width:30px; height:30px; border-radius:8px; background:var(--sig); color:var(--surface); font-family:var(--f-mono); font-size:.95rem; font-weight:600}
+.topbar-sp{flex:1}
+.tb-btn{flex:none; font:500 .85rem var(--f-body); color:var(--ink); background:var(--sunk); border:1px solid var(--line); border-radius:8px; padding:6px 12px; cursor:pointer; display:inline-flex; align-items:center; gap:6px}
+.tb-btn:hover{border-color:var(--accent)}
+
+/* ---------- page ---------- */
+main{max-width:880px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px)); padding-block:8px 96px}
+h1,h2,h3{font-family:var(--f-display); line-height:1.4; text-wrap:balance; margin:0; font-weight:700; overflow-wrap:break-word}
+h3{font-size:1.3rem; font-weight:600; margin:2.2em 0 .6em}
+p{margin:0 0 1em}
+ul,ol{margin:0 0 1.1em; padding-inline-start:1.4em}
+li{margin-bottom:.35em}
+strong{font-weight:700}
+.muted{color:var(--muted)}
+:not(pre)>code{font-family:var(--f-mono); font-size:.84em; background:var(--sunk); border:1px solid var(--line); padding:.04em .38em; border-radius:6px; direction:ltr; unicode-bidi:isolate; overflow-wrap:anywhere}
+
+.hero{padding-block:32px 8px}
+.eyebrow{font:600 .8rem var(--f-body); letter-spacing:.03em; color:var(--sig); display:flex; flex-wrap:wrap; gap:8px 14px; margin-bottom:14px}
+.hero h1{font-size:clamp(2rem, 5.4vw, 3.1rem); line-height:1.3; margin-bottom:18px}
+.hero h1 .k{color:var(--sig); font-family:var(--f-mono); font-weight:600; direction:ltr; unicode-bidi:isolate}
+.lead{font-size:1.12rem; color:var(--muted); max-width:66ch}
+.hero-meta{display:flex; flex-wrap:wrap; gap:10px; margin:20px 0 0}
+.chip{display:inline-flex; align-items:center; gap:6px; font-size:.84rem; padding:4px 12px; border-radius:999px; background:var(--surface); border:1px solid var(--line); color:var(--muted)}
+
+/* score: how many criteria each design wins */
+.score{display:grid; grid-template-columns:repeat(3, minmax(0,1fr)); gap:12px; margin:28px 0 10px}
+.score-cell{background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; min-width:0}
+.score-cell.sig{border-top:3px solid var(--sig)} .score-cell.plain{border-top:3px solid var(--plain)} .score-cell.eq{border-top:3px solid var(--line)}
+.score-n{font:600 2rem/1.1 var(--f-mono)}
+.score-cell.sig .score-n{color:var(--sig)} .score-cell.plain .score-n{color:var(--plain)} .score-cell.eq .score-n{color:var(--muted)}
+.score-l{font-size:.9rem; color:var(--muted); line-height:1.6; margin-top:4px}
+@media (max-width:560px){ .score{grid-template-columns:minmax(0,1fr)} .score-cell{display:flex; align-items:baseline; gap:14px} }
+
+.toc{margin:26px 0 0; padding:14px 18px; border:1px solid var(--line); border-radius:var(--r); background:var(--surface)}
+.toc b{font-size:.8rem; color:var(--muted); letter-spacing:.03em}
+.toc ol{list-style:none; margin:6px 0 0; padding:0; columns:2; column-gap:28px}
+.toc li{margin:0 0 2px; break-inside:avoid}
+.toc a{display:grid; grid-template-columns:30px minmax(0,1fr); gap:4px; text-decoration:none; color:var(--ink); padding:3px 6px; border-radius:6px; line-height:1.6; font-size:.94rem}
+.toc a:hover{background:var(--sunk)}
+.toc a span{font:.76rem/1.9 var(--f-mono); color:var(--muted)}
+@media (max-width:620px){ .toc ol{columns:1} }
+
+section.chapter{padding-block:56px 4px; border-top:1px solid var(--line); margin-top:44px}
+.ch-eyebrow{display:flex; flex-wrap:wrap; align-items:center; gap:10px; margin-bottom:10px; font:600 .8rem var(--f-body); color:var(--muted); letter-spacing:.03em}
+.ch-eyebrow .num{font-family:var(--f-mono); color:var(--ink); background:var(--sunk); border:1px solid var(--line); border-radius:6px; padding:0 8px}
+.chapter h2{font-size:clamp(1.5rem, 3.4vw, 2rem); margin-bottom:14px}
+
+/* ---------- code ---------- */
+.code{margin:1.1em 0 1.3em; border-radius:var(--r); overflow:hidden; background:var(--code-bg); border:1px solid var(--line); direction:ltr}
+.code-head{display:flex; align-items:center; gap:10px; padding:7px 10px 7px 14px; background:var(--code-head); color:var(--code-muted); font:500 .76rem var(--f-mono); border-bottom:1px solid var(--code-line)}
+.code-head .file{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.code-head .v{font-family:var(--f-body); font-weight:700; font-size:.78rem; direction:rtl; white-space:nowrap}
+.code.good{border-color:var(--good)} .code.good .code-head .v{color:var(--code-good)}
+.code.bad{border-color:var(--bad)} .code.bad .code-head .v{color:var(--code-bad)}
+.code.out pre{color:#C9D6E3}
+.copy{font:500 .72rem var(--f-body); color:var(--code-muted); background:transparent; border:1px solid var(--code-line); border-radius:6px; padding:2px 10px; cursor:pointer; direction:rtl}
+.copy:hover{color:var(--code-ink)}
+.code pre{margin:0; padding:16px 18px; overflow-x:auto; text-align:left; font:400 .84rem/1.75 var(--f-mono); color:var(--code-ink); tab-size:2}
+.code pre code{font:inherit; background:none; border:0; padding:0}
+.hljs-keyword,.hljs-built_in,.hljs-literal{color:var(--c-kw)}
+.hljs-string,.hljs-regexp{color:var(--c-str)}
+.hljs-title,.hljs-title.function_{color:var(--c-fn)}
+.hljs-comment{color:var(--c-com); font-style:italic}
+.hljs-number{color:var(--c-num)}
+.hljs-type,.hljs-title.class_{color:var(--c-type)}
+.hljs-attr,.hljs-property{color:var(--c-attr)}
+.hljs-params,.hljs-variable,.hljs-punctuation,.hljs-operator{color:var(--code-ink)}
+.lbl{display:inline-flex; align-items:center; gap:6px; font:700 .8rem var(--f-body); padding:2px 12px; border-radius:999px; margin:1em 0 -.4em}
+.lbl.issue{background:var(--bad-bg); color:var(--bad)}
+.lbl.fix{background:var(--good-bg); color:var(--good)}
+.lbl.out{background:var(--sunk); color:var(--muted)}
+
+/* ---------- callouts ---------- */
+.note{margin:1.5em 0; padding:14px 18px 6px; border-radius:var(--r); background:var(--accent-bg); border:1px solid var(--line)}
+.note-label{display:flex; align-items:center; gap:8px; font:700 .82rem var(--f-body); letter-spacing:.02em; color:var(--accent); margin-bottom:6px}
+.note-label::before{content:""; width:8px; height:8px; border-radius:2px; background:currentColor; transform:rotate(45deg)}
+.note.rule{background:var(--sig-bg)} .note.rule .note-label{color:var(--sig)}
+.note.warn{background:var(--warn-bg)} .note.warn .note-label{color:var(--warn)}
+.note.bad{background:var(--bad-bg)} .note.bad .note-label{color:var(--bad)}
+.note.senior{background:var(--surface)} .note.senior .note-label{color:var(--ink)}
+.result{margin:1em 0 1.4em; padding:12px 16px; border-inline-start:4px solid var(--bad); background:var(--surface); border-radius:0 var(--r) var(--r) 0}
+.result.ok{border-inline-start-color:var(--good)}
+.result p:last-child{margin-bottom:0}
+
+/* ---------- tables ---------- */
+.table-wrap{margin:1.3em 0; overflow-x:auto; border:1px solid var(--line); border-radius:var(--r); background:var(--surface)}
+table{border-collapse:collapse; width:100%; min-width:560px; font-size:.93rem; line-height:1.7}
+th,td{padding:10px 14px; text-align:right; vertical-align:top; border-bottom:1px solid var(--line)}
+thead th{font-size:.8rem; color:var(--muted); font-weight:600; background:var(--sunk); letter-spacing:.02em}
+tbody tr:last-child td{border-bottom:0}
+td.num{font-family:var(--f-mono); direction:ltr; unicode-bidi:isolate; white-space:nowrap}
+.tag{display:inline-block; font:600 .76rem var(--f-body); padding:1px 10px; border-radius:999px; white-space:nowrap}
+.tag.sig{background:var(--sig-bg); color:var(--sig)}
+.tag.plain{background:var(--plain-bg); color:var(--plain)}
+.tag.eq{background:var(--sunk); color:var(--muted)}
+
+/* ---------- figure ---------- */
+figure{margin:1.6em 0; background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:18px 18px 14px}
+.fig-scroll{overflow-x:auto}
+.fig-scroll svg{display:block; width:100%; height:auto; min-width:620px}
+figcaption{font-size:.88rem; color:var(--muted); margin-top:12px; line-height:1.75}
+.d-text{fill:var(--ink); font-family:var(--f-body); font-size:13px}
+.d-b{font-weight:700}
+.d-title{fill:var(--ink); font-family:var(--f-display); font-size:16px; font-weight:700}
+.d-sm{fill:var(--muted); font-family:var(--f-body); font-size:11.5px}
+.d-mono{fill:var(--ink); font-family:var(--f-mono); font-size:12.5px; direction:ltr; unicode-bidi:embed}
+tspan.d-code{font-family:var(--f-mono); direction:ltr; unicode-bidi:embed}
+.d-node{fill:var(--surface); stroke:var(--plain); stroke-width:1.25}
+.d-sig{fill:var(--sig-bg); stroke:var(--sig); stroke-width:2}
+.d-badbox{fill:var(--bad-bg); stroke:var(--bad); stroke-width:2}
+.d-rule{stroke:var(--line); stroke-width:1}
+.d-arrow{stroke:var(--plain); stroke-width:1.25; fill:none}
+.d-arrow-bad{stroke:var(--bad); stroke-width:1.5; fill:none; stroke-dasharray:5 4}
+.d-head{fill:var(--plain)} .d-head-bad{fill:var(--bad)}
+.d-bad-ink{fill:var(--bad)}
+
+.checks{list-style:none; padding:0}
+.checks li{position:relative; padding-inline-start:28px}
+.checks li::before{position:absolute; inset-inline-start:0; top:0; font-weight:700; content:"•"; color:var(--sig)}
+
+footer{max-width:880px; margin:0 auto; padding:24px max(16px, env(safe-area-inset-right,0px)) 56px max(16px, env(safe-area-inset-left,0px)); border-top:1px solid var(--line); color:var(--muted); font-size:.86rem}
+
+@media (max-width:640px){
+  body{font-size:16px}
+  .code pre{font-size:.78rem; padding:14px}
+  section.chapter{padding-block:44px 4px; margin-top:32px}
+}
+@media print{
+  .topbar,.copy,.toc{display:none}
+  body{background:#fff}
+  section.chapter{break-inside:auto}
+  .code{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="#top"><span class="brand-mark">↕</span><span class="brand-txt">الترتيب: signal أم متغير عادي</span></a>
+    <span class="topbar-sp"></span>
+    <button class="tb-btn" id="themeBtn" type="button" aria-label="تبديل الوضع الليلي">◐ <span id="themeLabel">الوضع</span></button>
+  </div>
+</header>
+
+<main id="top">
+
+<div class="hero">
+  <div class="eyebrow"><span>مقارنة تصميم</span><span>قائمة الـ Contacts</span><span>Angular 22.2.1</span></div>
+  <h1>لماذا نستخدم <span class="k">signal</span> في الترتيب؟</h1>
+  <p class="lead">اليوم تعطي النسختان نفس النتيجة، وفرق الأداء أقل من 0.3 ms لكل عملية. الفرق الحقيقي يظهر في التغييرات القادمة: ثلاث ميزات متوقعة تحتاج signal على أي حال، وميزتان تعملان في النسخة العادية فقط إذا تذكّر المطوّر قاعدة. <strong>التوصية: نُبقي الـ signal.</strong></p>
+  <div class="hero-meta">
+    <span class="chip">كل المخرجات من تشغيل حقيقي</span>
+    <span class="chip">8 اختبارات <code>ng test</code> نجحت</span>
+    <span class="chip">2026-10-19</span>
+  </div>
+
+  <div class="score" role="list" aria-label="عدد المعايير التي تفوز بها كل نسخة">
+    <div class="score-cell sig" role="listitem"><div class="score-n">6</div><div class="score-l">معايير لصالح نسخة الـ signal</div></div>
+    <div class="score-cell plain" role="listitem"><div class="score-n">3</div><div class="score-l">معايير لصالح النسخة العادية</div></div>
+    <div class="score-cell eq" role="listitem"><div class="score-n">1</div><div class="score-l">متساويتان: سلوك اليوم</div></div>
+  </div>
+
+  <nav class="toc" aria-label="محتويات الصفحة">
+    <b>المحتويات</b>
+    <ol>
+      <li><a href="#designs"><span>01</span>التصميمان باختصار</a></li>
+      <li><a href="#picture"><span>02</span>الصورة: من يُبقي القائمة مرتبة؟</a></li>
+      <li><a href="#today"><span>03</span>اليوم: نفس السلوك</a></li>
+      <li><a href="#redesign"><span>04</span>ثلاث ميزات تحتاج إعادة تصميم</a></li>
+      <li><a href="#remember"><span>05</span>ميزتان تعتمدان على التذكّر</a></li>
+      <li><a href="#plain-wins"><span>06</span>أين النسخة العادية أفضل</a></li>
+      <li><a href="#compare"><span>07</span>المقارنة الكاملة</a></li>
+      <li><a href="#decision"><span>08</span>القرار</a></li>
+      <li><a href="#verify"><span>09</span>كيف تحققنا</a></li>
+      <li><a href="#terms"><span>10</span>مصطلحات سريعة</a></li>
+    </ol>
+  </nav>
+</div>
+
+<!-- ============ 01 ============ -->
+<section class="chapter" id="designs">
+  <div class="ch-eyebrow"><span class="num">01</span><span>الفكرة</span></div>
+  <h2>التصميمان باختصار</h2>
+  <p>نسخة الـ signal تعامل الترتيب كـ <strong>قيمة مشتقة</strong>: القائمة المعروضة تُحسب من البيانات ومن حالة الترتيب، وتُعاد تلقائياً إذا تغيّر أيٌّ منهما. النسخة العادية تعامل الترتيب كـ <strong>حدث</strong>: نرتب في لحظات نختارها، ونحفظ النتيجة مرتبة فوق البيانات نفسها.</p>
+
+  <div class="code"><div class="code-head"><span class="file">contacts.store.ts</span><span class="v">نسخة الـ signal (الحالية، مختصرة)</span></div><pre><code class="language-ts">// الحالة: كل مفتاح في withState يصبح signal
+sortState: { column: '', direction: 'asc' },
+
+// القائمة المعروضة: تُحسب من البيانات + حالة الترتيب
+sortedContacts: computed(() =&gt; sortContacts(contacts(), sortState())),
+
+sortBy(column) {
+  patchState(store, { sortState: { column, direction } });
+}</code></pre></div>
+
+  <div class="code"><div class="code-head"><span class="file">contacts.store.ts</span><span class="v">النسخة العادية (بدون signal)</span></div><pre><code class="language-ts">let sort = { column: '', direction: 'asc' };   // متغير عادي
+
+function setFirstPage(contacts) {
+  patchState(store, { contacts: sortContacts(contacts, sort) });   // نرتب عند الكتابة
+}
+
+// داخل loadMore
+contacts: sortContacts([...contacts, ...newData], sort),
+
+sortBy(column) {
+  sort = { column, direction };
+  patchState(store, ({ contacts }) =&gt; ({ contacts: sortContacts(contacts, sort) }));
+}
+
+currentSort() { return sort; }   // للأسهم في عناوين الأعمدة</code></pre></div>
+
+  <div class="note rule">
+    <div class="note-label">القاعدتان اللتان تفرضهما النسخة العادية</div>
+    <p>النسخة العادية تمر في الـ Angular compiler بدون أخطاء وتعمل اليوم، لكنها تفرض على كل كود يُكتب لاحقاً:</p>
+    <ol>
+      <li><strong>القاعدة ①:</strong> كل كتابة في <code>contacts</code> يجب أن تمر عبر <code>sortContacts</code>.</li>
+      <li><strong>القاعدة ②:</strong> كل تغيير في <code>sort</code> يجب أن يتبعه <code>patchState</code> على <code>contacts</code>، وإلا لا تتحدث الشاشة.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============ 02 ============ -->
+<section class="chapter" id="picture">
+  <div class="ch-eyebrow"><span class="num">02</span><span>الصورة</span></div>
+  <h2>من يُبقي القائمة مرتبة؟</h2>
+  <figure>
+    <div class="fig-scroll">
+      <svg viewBox="0 0 760 612" role="img" aria-label="مكان واحد يرتب القائمة، أم كل كود يكتب فيها؟">
+        <defs>
+          <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head"/></marker>
+          <marker id="ar-bad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-head-bad"/></marker>
+        </defs>
+        <text class="d-title" x="380" y="32" text-anchor="middle">مكان واحد يرتب القائمة، أم كل كود يكتب فيها؟</text>
+
+        <!-- Panel A: signal -->
+        <text class="d-text d-b" x="380" y="70" text-anchor="middle">نسخة الـ <tspan class="d-code">signal</tspan>: الترتيب في مكان واحد</text>
+        <rect class="d-node" x="596" y="92" width="140" height="36" rx="8"/>
+        <rect class="d-node" x="596" y="138" width="140" height="36" rx="8"/>
+        <rect class="d-node" x="596" y="184" width="140" height="36" rx="8"/>
+        <rect class="d-node" x="596" y="230" width="140" height="36" rx="8"/>
+        <text class="d-mono" x="666" y="114" text-anchor="middle">sortBy</text>
+        <text class="d-mono" x="666" y="160" text-anchor="middle">loadMore</text>
+        <text class="d-text" x="666" y="206" text-anchor="middle">التحميل والبحث</text>
+        <text class="d-text" x="666" y="252" text-anchor="middle">ميزة جديدة: تعديل</text>
+        <path class="d-arrow" d="M596 110H568M596 156H568M596 202H568M596 248H568M568 110V248"/>
+        <path class="d-arrow" d="M568 179H540" marker-end="url(#ar)"/>
+        <path class="d-arrow" d="M400 179H364" marker-end="url(#ar)"/>
+        <path class="d-arrow" d="M200 179H164" marker-end="url(#ar)"/>
+        <rect class="d-node" x="400" y="137" width="140" height="84" rx="8"/>
+        <text class="d-text d-b" x="470" y="161" text-anchor="middle">الحالة</text>
+        <text class="d-mono" x="470" y="181" text-anchor="middle">contacts</text>
+        <text class="d-mono" x="470" y="199" text-anchor="middle">sortState</text>
+        <rect class="d-sig" x="200" y="143" width="164" height="72" rx="8"/>
+        <text class="d-mono d-b" x="282" y="167" text-anchor="middle">sortedContacts</text>
+        <text class="d-text" x="282" y="185" text-anchor="middle">يرتب تلقائياً</text>
+        <text class="d-text" x="282" y="203" text-anchor="middle">عند أي تغيير</text>
+        <rect class="d-node" x="24" y="149" width="140" height="60" rx="8"/>
+        <text class="d-text d-b" x="94" y="173" text-anchor="middle">الشاشة</text>
+        <text class="d-text" x="94" y="193" text-anchor="middle">الصفوف والأسهم</text>
+        <text class="d-sm" x="380" y="300" text-anchor="middle">أي كود جديد يكتب في الحالة يُرتَّب تلقائياً عبر <tspan class="d-code">sortedContacts</tspan></text>
+
+        <line class="d-rule" x1="24" y1="322" x2="736" y2="322"/>
+
+        <!-- Panel B: plain -->
+        <text class="d-text d-b" x="380" y="358" text-anchor="middle">النسخة العادية: كل كود يرتب بنفسه</text>
+        <rect class="d-node" x="596" y="374" width="140" height="36" rx="8"/>
+        <rect class="d-node" x="596" y="420" width="140" height="36" rx="8"/>
+        <rect class="d-node" x="596" y="466" width="140" height="36" rx="8"/>
+        <rect class="d-badbox" x="596" y="512" width="140" height="36" rx="8"/>
+        <text class="d-mono" x="666" y="396" text-anchor="middle">sortBy</text>
+        <text class="d-mono" x="666" y="442" text-anchor="middle">loadMore</text>
+        <text class="d-text" x="666" y="488" text-anchor="middle">التحميل والبحث</text>
+        <text class="d-text d-b" x="666" y="534" text-anchor="middle">ميزة جديدة: تعديل</text>
+        <rect class="d-node" x="404" y="378" width="136" height="28" rx="8"/>
+        <rect class="d-node" x="404" y="424" width="136" height="28" rx="8"/>
+        <rect class="d-node" x="404" y="470" width="136" height="28" rx="8"/>
+        <text class="d-mono" x="472" y="396" text-anchor="middle">sortContacts()</text>
+        <text class="d-mono" x="472" y="442" text-anchor="middle">sortContacts()</text>
+        <text class="d-mono" x="472" y="488" text-anchor="middle">sortContacts()</text>
+        <path class="d-arrow" d="M596 392H540" marker-end="url(#ar)"/>
+        <path class="d-arrow" d="M596 438H540" marker-end="url(#ar)"/>
+        <path class="d-arrow" d="M596 484H540" marker-end="url(#ar)"/>
+        <path class="d-arrow" d="M404 392H384M404 438H384M404 484H384M384 392V484"/>
+        <path class="d-arrow" d="M384 438H364" marker-end="url(#ar)"/>
+        <path class="d-arrow" d="M200 438H164" marker-end="url(#ar)"/>
+        <path class="d-arrow-bad" d="M596 530H300V474" marker-end="url(#ar-bad)"/>
+        <text class="d-text d-b" x="500" y="522" text-anchor="middle" style="font-size:11.5px">نسي القاعدة ①</text>
+        <rect class="d-node" x="200" y="402" width="164" height="72" rx="8"/>
+        <text class="d-mono d-b" x="282" y="426" text-anchor="middle">contacts</text>
+        <text class="d-text" x="282" y="444" text-anchor="middle">مرتبة مسبقاً</text>
+        <text class="d-sm" x="282" y="462" text-anchor="middle">ترتيب السيرفر ضاع</text>
+        <rect class="d-node" x="24" y="400" width="140" height="76" rx="8"/>
+        <text class="d-text d-b" x="94" y="424" text-anchor="middle">الشاشة</text>
+        <text class="d-text" x="94" y="442" text-anchor="middle">الصفوف والأسهم</text>
+        <text class="d-text d-b d-bad-ink" x="94" y="460" text-anchor="middle">صف خارج مكانه</text>
+        <text class="d-sm" x="380" y="588" text-anchor="middle">الصف الأخير: كود جديد لم يمر عبر <tspan class="d-code">sortContacts</tspan>، فظهر خارج مكانه. الحذف غير مرسوم لأنه لا يغيّر الترتيب.</text>
+      </svg>
+    </div>
+    <figcaption>في نسخة الـ signal يكتب كل كود في الحالة فقط، ومكان واحد يرتب. في النسخة العادية يجب أن يمر كل كود عبر <code>sortContacts</code>، والكود الذي ينساها يُظهر صفاً خارج مكانه (الميزة 4).</figcaption>
+  </figure>
+</section>
+
+<!-- ============ 03 ============ -->
+<section class="chapter" id="today">
+  <div class="ch-eyebrow"><span class="num">03</span><span>اليوم</span></div>
+  <h2>نفس السلوك، وفرق أداء لا يُرى</h2>
+  <p>كل ما تفعله ميزة الترتيب اليوم يعمل بنفس الشكل في النسختين، لذلك لا يمكن الحكم بينهما من الشاشة الحالية.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>ما يفعله المستخدم اليوم</th><th>signal</th><th>عادية</th></tr></thead>
+    <tbody>
+      <tr><td>الضغط على عنوان عمود (↑ ثم ↓)</td><td>يعمل</td><td>يعمل</td></tr>
+      <tr><td>التمرير وتحميل 10 contacts جديدة</td><td>يعمل</td><td>يعمل</td></tr>
+      <tr><td>البحث أو اختيار حرف</td><td>يعمل</td><td>يعمل</td></tr>
+      <tr><td>حذف contact</td><td>يعمل</td><td>يعمل</td></tr>
+      <tr><td>التحديد يبقى على نفس الـ contact بعد الترتيب</td><td>يعمل</td><td>يعمل</td></tr>
+      <tr><td>الأسهم ↑↓ و <code>aria-sort</code> في العناوين</td><td>يعمل</td><td>يعمل</td></tr>
+    </tbody>
+  </table></div>
+
+  <p>الأداء، مقاساً على جهاز التطوير بـ Node (محرك V8، نفس محرك Chrome و Edge):</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>القياس</th><th>signal</th><th>عادية</th></tr></thead>
+    <tbody>
+      <tr><td>قراءة قيمة الترتيب مرة واحدة</td><td class="num">5.3 ns</td><td class="num">3.1 ns</td></tr>
+      <tr><td>جلسة كاملة: 5 ضغطات + 20 loadMore + 5 حذف (من 100 إلى 300 صف)</td><td><span class="num">3.82 ms</span> (30 ترتيباً)</td><td><span class="num">0.89 ms</span> (25 ترتيباً)</td></tr>
+    </tbody>
+  </table></div>
+  <p>فرق الجلسة كلها أقل من 3 ms، بينما يرسم المتصفح إطاراً كل 16.7 ms. وسبب سرعة النسخة العادية ليس غياب الـ signal: هي تحفظ القائمة مرتبة، وترتيب قائمة شبه مرتبة أسرع. هذه الفكرة نفسها يمكن تطبيقها مع إبقاء الـ signal.</p>
+  <p class="muted">عند 10,000 صف يصبح الفرق ملحوظاً (حتى 21 ms لكل loadMore في نسخة الـ signal)، لكن الترتيب في المتصفح عند هذا الحجم خاطئ أصلاً: هو يرتب المحمّل فقط. الحل هناك هو الترتيب على السيرفر (الميزة 3).</p>
+</section>
+
+<!-- ============ 04 ============ -->
+<section class="chapter" id="redesign">
+  <div class="ch-eyebrow"><span class="num">04</span><span>التغييرات القادمة · 1</span></div>
+  <h2>ثلاث ميزات تحتاج إعادة تصميم في النسخة العادية</h2>
+  <p>هذه الميزات لا يحلها التذكّر: النسخة العادية تحتاج تغيير تصميمها نفسه، أو تعود إلى signal. المخرجات من تشغيل حقيقي، ببيانات سيرفر ترتيبها: Nablus, Amman, Jenin, Hebron (الميزة 3 تضيف Ramallah و Gaza).</p>
+
+  <h3>الميزة 1: إلغاء الترتيب (الرجوع لترتيب السيرفر)</h3>
+  <p>النسخة العادية لا تستطيع الرجوع حتى مع تطبيق القاعدتين، لأن ترتيب السيرفر ضاع لحظة كتبنا القائمة المرتبة فوق <code>contacts</code>.</p>
+  <span class="lbl fix">✓ signal</span>
+  <div class="code good"><div class="code-head"><span class="file">clearSort</span><span class="v">سطر واحد</span></div><pre><code class="language-ts">clearSort() {
+  patchState(store, { sortState: { column: '', direction: 'asc' } });
+}</code></pre></div>
+  <span class="lbl issue">✗ عادية</span>
+  <div class="code bad"><div class="code-head"><span class="file">clearSort</span><span class="v">تطبّق القاعدتين معاً، ولا يكفي</span></div><pre><code class="language-ts">clearSort() {
+  sort = { column: '', direction: 'asc' };
+  patchState(store, ({ contacts }) =&gt; ({ contacts: sortContacts(contacts, sort) }));
+}</code></pre></div>
+  <span class="lbl out">المخرجات الحقيقية</span>
+  <div class="code out"><div class="code-head"><span class="file">ng test</span><span class="v">Vitest · zoneless</span></div><pre><code class="language-plaintext">signals | server: Nablus, Amman, Jenin, Hebron | sorted: Amman, Hebron, Jenin, Nablus | after clearSort: Nablus, Amman, Jenin, Hebron
+plain   | server: Nablus, Amman, Jenin, Hebron | sorted: Amman, Hebron, Jenin, Nablus | after clearSort: Amman, Hebron, Jenin, Nablus</code></pre></div>
+  <div class="result"><p>لإصلاحها تحتاج النسخة العادية طلباً جديداً من السيرفر، أو قائمة ثانية <code>serverOrder</code> تُحدّث مع كل loadMore وحذف وتعديل، أي قواعد إضافية.</p></div>
+
+  <h3>الميزة 2: حفظ الترتيب المفضّل (أو وضعه في الـ URL، أو analytics)</h3>
+  <p>في نسخة الـ signal يلتقط سطر واحد كل تغيير في الترتيب من أي مكان. في النسخة العادية لا يوجد ما يمكن مراقبته.</p>
+  <span class="lbl fix">✓ signal</span>
+  <div class="code good"><div class="code-head"><span class="file">effect</span><span class="v">يعمل مع كل تغيير</span></div><pre><code class="language-ts">effect(() =&gt; savePreference(store.sortState()));</code></pre></div>
+  <span class="lbl issue">✗ عادية</span>
+  <div class="code bad"><div class="code-head"><span class="file">effect</span><span class="v">نفس السطر، لكن لا شيء يُراقَب</span></div><pre><code class="language-ts">effect(() =&gt; savePreference(store.currentSort()));</code></pre></div>
+  <p>غيّرنا الترتيب 4 مرات (City ↑، City ↓، إلغاء، استرجاع Company ↓):</p>
+  <span class="lbl out">المخرجات الحقيقية</span>
+  <div class="code out"><div class="code-head"><span class="file">ng test</span><span class="v">Vitest · zoneless</span></div><pre><code class="language-plaintext">signals | effect ran 5 times: -/asc  city/asc  city/desc  -/asc  company/desc
+plain   | effect ran 1 times: -/asc</code></pre></div>
+  <div class="result"><p>في النسخة العادية يجب استدعاء <code>savePreference()</code> يدوياً داخل <code>sortBy</code> و <code>clearSort</code> و <code>restoreSort</code>، وداخل كل دالة قادمة تغيّر الترتيب.</p></div>
+
+  <h3>الميزة 3: الترتيب على السيرفر</h3>
+  <p>هذا هو الحل الصحيح لمشكلة موجودة اليوم: الترتيب يشمل الـ contacts المحمّلة فقط، والسيرفر يرسل الصفحات بترتيب <code>id</code>.</p>
+  <span class="lbl fix">✓ signal</span>
+  <div class="code good"><div class="code-head"><span class="file">query</span><span class="v">سطر واحد، والـ switchMap يُلغي القديم</span></div><pre><code class="language-ts">query: computed(() =&gt; ({ term: searchTerm(), letter: selectedLetter(), sort: sortState() })),</code></pre></div>
+  <span class="lbl issue">✗ عادية</span>
+  <div class="code bad"><div class="code-head"><span class="file">sortBy</span><span class="v">المتغير لا يدخل computed، فيطلب وحده</span></div><pre><code class="language-ts">sortBy(column) { sort = { column, direction }; reloadFirstPage(); }</code></pre></div>
+  <p>السيناريو: نكتب "a" فيبدأ طلب بحث بطيء (A، 300 ms)، ثم نضغط City فوراً فيبدأ طلب سريع (B، 100 ms).</p>
+  <span class="lbl out">المخرجات الحقيقية</span>
+  <div class="code out"><div class="code-head"><span class="file">node race.mjs</span><span class="v">RxJS 7.8.2</span></div><pre><code class="language-plaintext">signals typed "a"      -&gt; request A (slow)
+signals clicked City ↑ -&gt; request B (fast), A is cancelled
+signals shows response B: Amman, Gaza, Nablus, Ramallah
+signals FINAL: arrow City ↑ | rows: Amman, Gaza, Nablus, Ramallah
+
+plain   typed "a"      -&gt; request A (slow)
+plain   clicked City ↑ -&gt; request B (fast), A still running
+plain   shows response B: Amman, Gaza, Nablus, Ramallah
+plain   shows response A: Nablus, Amman, Ramallah, Gaza
+plain   FINAL: arrow City ↑ | rows: Nablus, Amman, Ramallah, Gaza</code></pre></div>
+  <div class="result"><p>في النسخة العادية وصل الرد القديم A أخيراً وغطّى على الرد الصحيح: السهم يقول City ↑ والصفوف غير مرتبة. الإصلاح يتطلب إدخال الترتيب في نفس الـ stream، أي تحويله إلى signal أو Subject، وهو بالضبط ما أزلناه.</p></div>
+</section>
+
+<!-- ============ 05 ============ -->
+<section class="chapter" id="remember">
+  <div class="ch-eyebrow"><span class="num">05</span><span>التغييرات القادمة · 2</span></div>
+  <h2>ميزتان تعملان في النسخة العادية فقط إذا تذكّر المطوّر قاعدة</h2>
+  <p>في نسخة الـ signal، الكود الطبيعي لهاتين الميزتين صحيح. في النسخة العادية، الكود الطبيعي خطأ لا يُظهر أي error، والصحيح يحتاج تذكّر قاعدة.</p>
+
+  <h3>الميزة 4: تعديل contact، أو Realtime يرسل تحديثاً (القاعدة ①)</h3>
+  <p>نفس الكود الطبيعي في النسختين:</p>
+  <div class="code"><div class="code-head"><span class="file">updateContact</span><span class="v">نفس الكود في النسختين</span></div><pre><code class="language-ts">patchState(store, ({ contacts }) =&gt; ({
+  contacts: contacts.map((c) =&gt; (c.id === '2' ? { ...c, city: 'Zarqa' } : c)),
+}));</code></pre></div>
+  <p>القائمة مرتبة حسب City ↑، وغيّرنا Amman إلى Zarqa:</p>
+  <span class="lbl out">المخرجات الحقيقية</span>
+  <div class="code out"><div class="code-head"><span class="file">ng test</span><span class="v">Vitest · zoneless</span></div><pre><code class="language-plaintext">signals | before: Amman, Hebron, Jenin, Nablus | after edit: Hebron, Jenin, Nablus, Zarqa
+plain   | before: Amman, Hebron, Jenin, Nablus | after edit: Zarqa, Hebron, Jenin, Nablus</code></pre></div>
+  <div class="result"><p>في النسخة العادية تظهر Zarqa أول القائمة تحت سهم City ↑. الإصلاح لفّ القائمة بـ <code>sortContacts(...)</code>، أي تذكّر القاعدة ① في كل مكان يكتب في <code>contacts</code>.</p></div>
+
+  <h3>الميزة 5: الترتيب المحفوظ يصل من السيرفر بعد <code>await</code> (القاعدة ②)</h3>
+  <span class="lbl fix">✓ signal</span>
+  <div class="code good"><div class="code-head"><span class="file">restoreSort</span><span class="v">الكود الطبيعي</span></div><pre><code class="language-ts">restoreSort(saved) { patchState(store, { sortState: saved }); }</code></pre></div>
+  <span class="lbl issue">✗ عادية</span>
+  <div class="code bad"><div class="code-head"><span class="file">restoreSort</span><span class="v">نسيت القاعدة ②</span></div><pre><code class="language-ts">restoreSort(saved) { sort = saved; }</code></pre></div>
+  <p>اختبار على الشاشة، zoneless مثل التطبيق:</p>
+  <span class="lbl out">المخرجات الحقيقية</span>
+  <div class="code out"><div class="code-head"><span class="file">ng test</span><span class="v">Vitest · zoneless</span></div><pre><code class="language-plaintext">signals | after header click       : arrow ↑ | rows: Amman, Hebron, Jenin, Nablus
+signals | after restoreSort        : arrow ↓ | rows: Nablus, Jenin, Hebron, Amman
+
+plain   | after header click       : arrow ↑ | rows: Amman, Hebron, Jenin, Nablus
+plain   | after restoreSort        : arrow ↑ | rows: Amman, Hebron, Jenin, Nablus
+plain   | after an unrelated click : arrow ↓ | rows: Amman, Hebron, Jenin, Nablus
+plain   | restoreSortCorrectly(desc): arrow ↓ | rows: Nablus, Jenin, Hebron, Amman</code></pre></div>
+  <div class="result">
+    <ul>
+      <li>بعد <code>restoreSort</code> لا يتغير شيء على الشاشة، ولا يظهر أي error في الـ console.</li>
+      <li>بعد الضغط على زر لا علاقة له بالترتيب، يتغير السهم إلى ↓ وتبقى الصفوف تصاعدية: الشاشة تناقض نفسها.</li>
+      <li>السطر الأخير: مع <code>patchState</code> تعمل النسخة العادية بشكل صحيح.</li>
+    </ul>
+  </div>
+  <div class="note">
+    <div class="note-label">لماذا لا تتحدث الشاشة؟</div>
+    <p>التطبيق zoneless، فالشاشة تتحدث فقط عندما يتغير signal أو بعد حدث في الـ template. تغيير متغير عادي بعد <code>await</code> لا يُبلّغ أحداً.</p>
+  </div>
+</section>
+
+<!-- ============ 06 ============ -->
+<section class="chapter" id="plain-wins">
+  <div class="ch-eyebrow"><span class="num">06</span><span>بإنصاف</span></div>
+  <h2>أين النسخة العادية أفضل</h2>
+  <p>للنسخة العادية ثلاث مزايا حقيقية، والأولى قرار منتج وليست قراراً تقنياً.</p>
+  <ol>
+    <li><strong>صورة ثابتة مقابل ترتيب حي.</strong> في الميزة 4 انتقل الصف المعدّل في نسخة الـ signal من أول القائمة إلى آخرها. إذا كان المستخدم يعدّل داخل الجدول، يختفي الصف من تحت يده. إذا كان المطلوب أن يكون الترتيب أمراً لمرة واحدة (مثل Sort في Google Sheets)، فسلوك النسخة العادية هو الصحيح. وإذا كان المطلوب أن تبقى القائمة مرتبة دائماً، فنسخة الـ signal هي الصحيحة.</li>
+    <li><strong>وضوح لحظة التنفيذ.</strong> الـ breakpoint داخل <code>sortBy</code> يُظهر متى يحدث الترتيب بالضبط. أما الـ <code>computed</code> فيعمل عند القراءة أثناء رسم الشاشة، والـ stack trace يمر عبر Angular. هذا أسهل على من لا يعرف الـ signals.</li>
+    <li><strong>الأداء.</strong> أسرع بأقل من 3 ms في جلسة كاملة (القسم 03)، وهو فرق لا يلاحظه المستخدم.</li>
+  </ol>
+</section>
+
+<!-- ============ 07 ============ -->
+<section class="chapter" id="compare">
+  <div class="ch-eyebrow"><span class="num">07</span><span>الجدول</span></div>
+  <h2>المقارنة الكاملة</h2>
+  <p>نسخة الـ signal أفضل في 6 معايير، والعادية أفضل في 3، والنسختان متساويتان في سلوك اليوم.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>المعيار</th><th>signal (الحالية)</th><th>عادية (بدون signal)</th><th>الأفضل</th></tr></thead>
+    <tbody>
+      <tr><td>السلوك اليوم</td><td>يعمل</td><td>يعمل</td><td><span class="tag eq">متساويتان</span></td></tr>
+      <tr><td>الميزة 1: إلغاء الترتيب</td><td>سطر واحد</td><td>تحتاج طلباً جديداً أو قائمة ثانية</td><td><span class="tag sig">signal</span></td></tr>
+      <tr><td>الميزة 2: حفظ التفضيل أو الـ URL</td><td><code>effect</code> واحد</td><td>استدعاء يدوي في كل دالة</td><td><span class="tag sig">signal</span></td></tr>
+      <tr><td>الميزة 3: الترتيب على السيرفر</td><td>سطر في <code>query</code></td><td>race، والإصلاح يعيد signal</td><td><span class="tag sig">signal</span></td></tr>
+      <tr><td>الميزة 4: كود جديد يكتب في <code>contacts</code></td><td>تلقائي</td><td>يعمل إذا طُبّقت القاعدة ①</td><td><span class="tag sig">signal</span></td></tr>
+      <tr><td>الميزة 5: تغيير الترتيب بعد <code>await</code></td><td>تلقائي</td><td>يعمل إذا طُبّقت القاعدة ②</td><td><span class="tag sig">signal</span></td></tr>
+      <tr><td>قواعد يجب أن يعرفها كل مطوّر</td><td>لا شيء</td><td>قاعدتان</td><td><span class="tag sig">signal</span></td></tr>
+      <tr><td>تعديل صف بدون أن يقفز</td><td>يقفز (ترتيب حي)</td><td>يبقى مكانه</td><td><span class="tag plain">عادية</span></td></tr>
+      <tr><td>تتبع لحظة الترتيب بالـ debugger</td><td>أصعب قليلاً</td><td>أوضح</td><td><span class="tag plain">عادية</span></td></tr>
+      <tr><td>الأداء (جلسة كاملة)</td><td class="num">3.82 ms</td><td class="num">0.89 ms</td><td><span class="tag plain">عادية</span> <span class="muted">(فرق لا يُرى)</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ 08 ============ -->
+<section class="chapter" id="decision">
+  <div class="ch-eyebrow"><span class="num">08</span><span>التوصية</span></div>
+  <h2>القرار</h2>
+  <div class="note rule">
+    <div class="note-label">نُبقي الـ signal</div>
+    <p>القائمة تُحمّل من Supabase على صفحات، والحل الصحيح للترتيب على المدى الطويل هو السيرفر (الميزة 3)، وهو يحتاج signal على أي حال.</p>
+  </div>
+  <p>النسخة العادية اختيار سليم فقط إذا تحققت الشروط الثلاثة معاً:</p>
+  <ul class="checks">
+    <li>المنتج يريد الترتيب "صورة ثابتة"، وليس ترتيباً حياً.</li>
+    <li>لا توجد خطة لإلغاء الترتيب أو حفظه أو نقله إلى السيرفر (الميزات 1 إلى 3).</li>
+    <li>تُكتب القاعدتان ① و ② في تعليق فوق <code>let sort</code>، ويُراجَع على أساسهما كل كود جديد يكتب في <code>contacts</code> أو يغيّر الترتيب.</li>
+  </ul>
+  <div class="note warn">
+    <div class="note-label">سؤال مفتوح للفريق</div>
+    <p>هل نريد ترتيباً حياً (الصف ينتقل فور تعديله) أم صورة ثابتة (يبقى مكانه حتى الترتيب التالي)؟</p>
+  </div>
+  <div class="note senior">
+    <div class="note-label">الخلاصة في جملة</div>
+    <p>اليوم النسختان متساويتان في النتيجة والأداء، لكن إلغاء الترتيب وحفظه ونقله إلى السيرفر تحتاج signal في كل الأحوال.</p>
+  </div>
+</section>
+
+<!-- ============ 09 ============ -->
+<section class="chapter" id="verify">
+  <div class="ch-eyebrow"><span class="num">09</span><span>الدليل</span></div>
+  <h2>كيف تحققنا</h2>
+  <p>كل المخرجات في هذه الصفحة من تشغيل حقيقي على نسخة تجريبية من المشروع، ولم يُعدّل المشروع نفسه.</p>
+  <ul>
+    <li><strong>الإصدارات:</strong> Angular 22.2.1، و <code>@ngrx/signals</code> 22.0.1، و RxJS 7.8.2، و Vitest 5.0.3، و TypeScript 6.0.3.</li>
+    <li><strong>النسختان:</strong> ملف الـ store الحالي، ونسخة بدون signal بنفس دالة المقارنة. النسخة العادية تمر في الـ Angular compiler بدون أخطاء، مع ملف تحكم فيه خطأ متعمد للتأكد أن فحص الـ templates يعمل.</li>
+    <li><strong>الميزات 1 و 2 و 4 و 5:</strong> 8 اختبارات بـ <code>ng test</code> (Vitest، و zoneless مثل التطبيق)، نجحت كلها. الـ services استُبدلت بـ 4 contacts وهمية.</li>
+    <li><strong>الميزة 3:</strong> محاكاة بـ RxJS من المشروع، مع تأخير وهمي للطلبات (A: 300 ms، B: 100 ms).</li>
+    <li><strong>الأداء:</strong> Node على جهاز التطوير، مليون قراءة لكل نوع، والوسيط من 21 إلى 31 تشغيلاً لكل ترتيب. الأرقام تختلف من جهاز لآخر، لكن النسب بينها تبقى متقاربة.</li>
+  </ul>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="chapter" id="terms">
+  <div class="ch-eyebrow"><span class="num">10</span><span>مرجع</span></div>
+  <h2>مصطلحات سريعة</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>المصطلح</th><th>المعنى باختصار</th></tr></thead>
+    <tbody>
+      <tr><td><code>signal</code></td><td>قيمة تُبلّغ كل من يقرؤها عندما تتغير</td></tr>
+      <tr><td><code>computed</code></td><td>قيمة تُحسب من signals أخرى، تُعاد تلقائياً عند تغيّرها، وتُحفظ بين التغييرات</td></tr>
+      <tr><td><code>effect</code></td><td>كود يعمل تلقائياً كلما تغيّر signal يقرؤه، مثل الحفظ في localStorage</td></tr>
+      <tr><td><code>patchState</code></td><td>طريقة تغيير الحالة داخل NgRx SignalStore</td></tr>
+      <tr><td>zoneless</td><td>Angular يحدّث الشاشة عند تغيّر signal أو بعد حدث في الـ template فقط، وهو الوضع الافتراضي منذ Angular 21</td></tr>
+      <tr><td><code>switchMap</code></td><td>عامل RxJS يُلغي الطلب القديم عند بدء طلب جديد</td></tr>
+      <tr><td>race</td><td>طلبان يتسابقان، والأقدم يصل أخيراً فيغطّي على الأحدث</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
+
+<footer>
+  مقارنة تصميم ميزة الترتيب في قائمة الـ Contacts · 2026-10-19 · Angular 22.2.1 · <code>@ngrx/signals</code> 22.0.1
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@highlightjs/cdn-assets@11.9.0/highlight.min.js"></script>
+<script>
+(function () {
+  'use strict';
+  var root = document.documentElement;
+  var store = {
+    get: function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    set: function (k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } }
+  };
+
+  /* ---------- theme (same key as the courses) ---------- */
+  var themeLabel = document.getElementById('themeLabel');
+  function currentTheme() {
+    if (root.dataset.theme) return root.dataset.theme;
+    return window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  }
+  function showTheme() { themeLabel.textContent = currentTheme() === 'dark' ? 'ليلي' : 'نهاري'; }
+  var savedTheme = store.get('course-theme');
+  if (savedTheme === 'dark' || savedTheme === 'light') root.dataset.theme = savedTheme;
+  showTheme();
+  document.getElementById('themeBtn').addEventListener('click', function () {
+    var t = currentTheme() === 'dark' ? 'light' : 'dark';
+    root.dataset.theme = t; store.set('course-theme', t); showTheme();
+  });
+
+  /* ---------- code highlighting + copy buttons ---------- */
+  if (window.hljs) {
+    window.hljs.configure({ ignoreUnescapedHTML: true });
+    document.querySelectorAll('pre code.language-ts').forEach(function (el) {
+      try { window.hljs.highlightElement(el); } catch (e) { /* plain text is fine */ }
+    });
+  }
+  document.querySelectorAll('.code:not(.out)').forEach(function (block) {
+    var head = block.querySelector('.code-head'), code = block.querySelector('pre code');
+    if (!head || !code) return;
+    var btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'copy'; btn.textContent = 'نسخ';
+    btn.addEventListener('click', function () {
+      var reset = function (t) { setTimeout(function () { btn.textContent = 'نسخ'; }, t); };
+      var fallback = function () {
+        var r = document.createRange(); r.selectNodeContents(code);
+        var s = window.getSelection(); s.removeAllRanges(); s.addRange(r);
+        btn.textContent = 'حُدّد النص، انسخه'; reset(2200);
+      };
+      try {
+        navigator.clipboard.writeText(code.textContent).then(function () { btn.textContent = 'نُسخ'; reset(1400); }, fallback);
+      } catch (e) { fallback(); }
+    });
+    head.appendChild(btn);
+  });
+})();
+</script>
+</body>
+</html>
